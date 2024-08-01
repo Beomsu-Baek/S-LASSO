@@ -35,7 +35,7 @@ def ElasticNet(X, y, logistic=False, sample_weight=None, random_state=None):
     if logistic:
         for i, alpha in enumerate(np.arange(0, 1.1, 0.1)):
             cv_enet = glmnet.LogitNet(standardize=False, fit_intercept=False, n_splits=5, scoring='accuracy',
-                                      alpha=alpha).fit(X, y, sample_weight=sample_weight)
+                                      alpha=alpha)
             cv_enet.fit(X, y, sample_weight=sample_weight)
             mses = np.append(mses, cv_enet.cv_mean_score_.max())
             cv_result_dict[f'cv_result_{i}'] = cv_enet
@@ -43,10 +43,42 @@ def ElasticNet(X, y, logistic=False, sample_weight=None, random_state=None):
         for i, alpha in enumerate(np.arange(0, 1.1, 0.1)):
             cv_enet = glmnet.ElasticNet(standardize=False, fit_intercept=False, n_splits=5,
                                         scoring='mean_squared_error',
-                                        alpha=alpha).fit(X, y, sample_weight=sample_weight)
+                                        alpha=alpha)
             cv_enet.fit(X, y, sample_weight=sample_weight)
             mses = np.append(mses, cv_enet.cv_mean_score_.max())
             cv_result_dict[f'cv_result_{i}'] = cv_enet
 
     cv_max_model = cv_result_dict[f'cv_result_{np.argmax(mses)}']
     return cv_max_model.coef_
+
+def LASSO(X, y, logistic=False, sample_weight=None, random_state=None):
+    """
+    Elastic Net with cross-validation for otpimal alpha and lambda
+    """
+    if logistic:
+        LASSO = glmnet.LogitNet(standardize=False, fit_intercept=False, n_splits=5, scoring='accuracy',
+                                  alpha=1)
+        LASSO.fit(X, y, sample_weight=sample_weight)
+    else:
+        LASSO = glmnet.ElasticNet(standardize=False, fit_intercept=False, n_splits=5,
+                                    scoring='mean_squared_error',
+                                    alpha=1)
+        LASSO.fit(X, y, sample_weight=sample_weight)
+
+    return LASSO.coef_
+
+def Ridge(X, y, logistic=False, sample_weight=None, random_state=None):
+    """
+    Elastic Net with cross-validation for otpimal alpha and lambda
+    """
+    if logistic:
+        Ridge = glmnet.LogitNet(standardize=False, fit_intercept=False, n_splits=5, scoring='accuracy',
+                                  alpha=0)
+        Ridge.fit(X, y, sample_weight=sample_weight)
+    else:
+        Ridge = glmnet.ElasticNet(standardize=False, fit_intercept=False, n_splits=5,
+                                    scoring='mean_squared_error',
+                                    alpha=0)
+        Ridge.fit(X, y, sample_weight=sample_weight)
+
+    return Ridge.coef_
